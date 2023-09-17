@@ -4,7 +4,9 @@ The IRC bot to announce new Nyaa releases.
 
 NekoBot scrapes https://nyaa.si for new releases and sends a message to `#nyaannounce` in Rizon IRC
 
-Autobrr Definition can be find [here](https://raw.githubusercontent.com/Flupster/nekobot/main/nyaa.yaml)
+Autobrr Definition for all Nyaa releases can be found [here](https://raw.githubusercontent.com/Flupster/nekobot/main/nyaa.yaml)
+
+Autobrr Definition for SubsPlease releases can be found [here](https://raw.githubusercontent.com/Flupster/nekobot/main/subsplease.yaml)
 
 Instructions on setting up custom definitions in autobrr can be found [here](https://autobrr.com/configuration/indexers/#custom-indexer-definitions)
 
