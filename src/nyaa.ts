@@ -1,36 +1,80 @@
 import { load } from "cheerio"
+import EventEmitter from "events"
+import redis from "./redis"
 
-const getReleases = async (): Promise<NyaaRelease[]> => {
-  const response = await fetch("https://nyaa.si/")
-  const text = await response.text()
-  const $ = load(text)
+interface Nyaa {
+  lastId: number
+  on(event: "release", listener: (release: NyaaRelease) => void): this
+}
 
-  return $(".torrent-list tbody tr")
-    .toArray()
-    .map((el) => {
-      const release: Partial<NyaaRelease> = {}
-      const tds = $(el).find("td")
+class Nyaa extends EventEmitter {
+  constructor() {
+    super()
+    this.init()
+    this.lastId = 0
 
-      release.id = parseInt($(tds[1]).find("a").attr("href")?.split("/")[2] ?? "", 10)
-      release.title = $(tds[1]).find("a").last().attr("title")
-      release.guid = `https://nyaa.si/view/${release.id}`
-      release.link = `https://nyaa.si/download/${release.id}.torrent`
-      release.categoryId = $(tds[0]).find("a").attr("href")?.substring(4) as CategoryIds
-      release.category = CategoryMap.get(release.categoryId) as Categories
-      release.comments = parseInt($(tds[1]).find(".comments").text().trim(), 10) ?? 0
-      release.downloads = parseInt($(tds[7]).text(), 10) ?? 0
-      release.infoHash = ""
-      release.leechers = parseInt($(tds[6]).text(), 10) ?? 0
-      release.remake = el.attribs.class.includes("danger")
-      release.seeders = parseInt($(tds[5]).text(), 10) ?? 0
-      release.size = $(tds[3]).text()
-      release.trusted = el.attribs.class.includes("success")
-      release.pubDate = new Date($(tds[4]).text())
+    setInterval(this.update.bind(this), 30000)
+  }
 
-      release.comments = isNaN(release.comments) ? 0 : release.comments
+  async init() {
+    const last = await redis.get("last")
+    if (!last) throw "Last release ID is not set in redis"
 
-      return release as NyaaRelease
-    })
+    this.lastId = parseInt(last, 10)
+    console.log(new Date(), "Last release ID:", this.lastId)
+  }
+
+  async update() {
+    const releases = await this.getReleases()
+
+    if (releases.length === 0) {
+      console.warn(new Date(), "Got 0 releases from Nyaa")
+      return
+    }
+
+    releases
+      .filter((release) => release.id > this.lastId)
+      .reverse()
+      .forEach((release) => this.emit("release", release))
+
+    redis.set("last", releases[0].id)
+  }
+
+  async getReleases(): Promise<NyaaRelease[]> {
+    console.log(new Date(), "Fetching releases from https://nyaa.si/")
+
+    const response = await fetch("https://nyaa.si/")
+    const text = await response.text()
+    const $ = load(text)
+
+    return $(".torrent-list tbody tr")
+      .toArray()
+      .map((el) => {
+        const release: Partial<NyaaRelease> = {}
+        const tds = $(el).find("td")
+
+        release.id = parseInt($(tds[1]).find("a").attr("href")?.split("/")[2] ?? "", 10)
+        release.title = $(tds[1]).find("a").last().attr("title")
+        release.guid = `https://nyaa.si/view/${release.id}`
+        release.link = `https://nyaa.si/download/${release.id}.torrent`
+        release.torrent = `https://nyaa.si/view/${release.id}/torrent`
+        release.categoryId = $(tds[0]).find("a").attr("href")?.substring(4) as CategoryIds
+        release.category = CategoryMap.get(release.categoryId) as Categories
+        release.comments = parseInt($(tds[1]).find(".comments").text().trim(), 10) ?? 0
+        release.downloads = parseInt($(tds[7]).text(), 10) ?? 0
+        release.infoHash = ""
+        release.leechers = parseInt($(tds[6]).text(), 10) ?? 0
+        release.remake = el.attribs.class.includes("danger")
+        release.seeders = parseInt($(tds[5]).text(), 10) ?? 0
+        release.size = $(tds[3]).text()
+        release.trusted = el.attribs.class.includes("success")
+        release.pubDate = new Date($(tds[4]).text())
+
+        release.comments = isNaN(release.comments) ? 0 : release.comments
+
+        return release as NyaaRelease
+      })
+  }
 }
 
 const CategoryMap = new Map<string, string>([
@@ -53,4 +97,4 @@ const CategoryMap = new Map<string, string>([
   ["6_2", "Software - Games"],
 ])
 
-export default getReleases
+export default new Nyaa()

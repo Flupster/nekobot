@@ -7,7 +7,7 @@ const bot = new irc.Client(process.env.IRC_SERVER, process.env.IRC_NICK, {
   floodProtectionDelay: 1000,
   realName: process.env.IRC_NAME,
   userName: process.env.IRC_NICK,
-  channels: [process.env.IRC_CHANNEL],
+  channels: ["#nyaannounce", "#subsplease"],
 })
 
 // Register with NickServ

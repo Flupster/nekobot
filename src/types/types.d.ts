@@ -41,6 +41,7 @@ type NyaaRelease = {
   title: string
   guid: string
   link: string
+  torrent: string
   category: Categories
   categoryId: CategoryIds
   comments: number

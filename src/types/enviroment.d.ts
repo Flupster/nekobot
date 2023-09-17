@@ -8,7 +8,6 @@ declare global {
       IRC_NAME: string
       IRC_PASS: string
       IRC_DEBUG: "true" | "false"
-      IRC_CHANNEL: string
     }
   }
 }
