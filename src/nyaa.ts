@@ -10,8 +10,8 @@ interface Nyaa {
 class Nyaa extends EventEmitter {
   constructor() {
     super()
-    this.init()
     this.lastId = 0
+    this.init()
 
     setInterval(this.update.bind(this), 30000)
   }
@@ -38,6 +38,7 @@ class Nyaa extends EventEmitter {
       .forEach((release) => this.emit("release", release))
 
     redis.set("last", releases[0].id)
+    this.lastId = releases[0].id
   }
 
   async getReleases(): Promise<NyaaRelease[]> {
