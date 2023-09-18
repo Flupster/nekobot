@@ -21,6 +21,7 @@ irc:
     - "#subsplease"
   announcers:
     - "NekoNeko"
+    - "Katou"
   settings:
     - name: nick
       type: text
