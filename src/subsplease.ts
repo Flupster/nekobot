@@ -1,5 +1,5 @@
 import Nyaa from "./nyaa"
-import bot from "./irc"
+import { privmsg } from "./irc"
 
 // Nyaa gives it XiB, convert to XB (MiB=>MB, GiB=>GB, etc)
 const convertSize = (size: string) => {
@@ -21,5 +21,5 @@ Nyaa.on("release", (release) => {
   }
 
   const message = `[Release] ${release.title} (${convertSize(release.size)}) - ${release.guid} - ${release.torrent}`
-  bot.say("#subsplease", message)
+  privmsg("#subsplease", message)
 })

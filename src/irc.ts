@@ -19,4 +19,14 @@ bot.on("netError", (e) => {
   process.exit(1)
 })
 
+// Message queue as events do not honor flood protection
+const messageQueue: { target: string; text: string }[] = []
+export const privmsg = (target: string, text: string) => messageQueue.push({ target, text })
+const queue = () => {
+  const message = messageQueue.pop()
+  if (message) bot.say(message.target, message.text)
+}
+
+setInterval(queue, 1000)
+
 export default bot
