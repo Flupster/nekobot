@@ -94,7 +94,7 @@ class Nyaa extends EventEmitter {
 
   convertTokyoTorrent(torrent: TokyoTorrent, category: string) {
     // convert size from XB to XiB
-    const sizeRegex = /(\d.+)?([KMGTP])B/
+    const sizeRegex = /(\d.+)?([KMGTP])/
     const sizeMatch = sizeRegex.exec(torrent.size)
     if (!sizeMatch) {
       this.log.warn("TokyoTorrent size could not be parsed", torrent.size)
