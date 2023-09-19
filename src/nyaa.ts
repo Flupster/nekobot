@@ -116,7 +116,7 @@ class Nyaa extends EventEmitter {
     // Check if the release exists
     const exists = getReleaseById(id)
     if (exists) {
-      this.log.warn("Nyaa ID from tokyo url could not be parsed", torrent.url)
+      this.log.warn("Release was already announced", id)
       return
     }
 
