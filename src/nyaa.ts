@@ -97,7 +97,7 @@ class Nyaa extends EventEmitter {
     const sizeRegex = /(\d.+)?([KMGTP])/
     const sizeMatch = sizeRegex.exec(torrent.size)
     if (!sizeMatch) {
-      this.log.warn("TokyoTorrent size could not be parsed", torrent.size)
+      this.log.warn("TokyoTorrent size could not be parsed:", torrent.size)
       return
     }
 
@@ -107,7 +107,7 @@ class Nyaa extends EventEmitter {
     const idRegex = /https:\/\/nyaa\.si\/download\/(\d+)\.torrent/
     const idMatch = idRegex.exec(torrent.url)
     if (!idMatch) {
-      this.log.warn("Nyaa ID from tokyo url could not be parsed", torrent.url)
+      this.log.warn("Nyaa ID from tokyo url could not be parsed:", torrent.url)
       return
     }
 
@@ -116,7 +116,7 @@ class Nyaa extends EventEmitter {
     // Check if the release exists
     const exists = getReleaseById(id)
     if (exists) {
-      this.log.warn("Release was already announced", id)
+      this.log.warn("Release was already announced:", id)
       return
     }
 
