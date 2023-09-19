@@ -25,7 +25,7 @@ bot.on("netError", (e) => {
 })
 
 bot.on("error", (e) => log.error(e))
-bot.on("message", (from, to, text, message) => log.trace(`${to} <${from}>: ${message} - ${text}`))
+bot.on("message", (from, to, text) => log.trace(`${to} <${from}>: ${text}`))
 
 // Message queue as events do not honor flood protection
 const messageQueue: { target: string; text: string }[] = []
