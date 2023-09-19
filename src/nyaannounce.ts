@@ -1,9 +1,9 @@
 import Nyaa from "./nyaa"
-import { privmsg } from "./irc"
+import bot from "./irc"
 
 const announce = (release: NyaaRelease | TokyoRelease) => {
   const message = `[${release.category}] - ${release.title} - (${release.size}) - ${release.torrent}`
-  privmsg("#nyaannounce", message)
+  bot.say("#nyaannounce", message)
 }
 
 Nyaa.on("release", announce)
