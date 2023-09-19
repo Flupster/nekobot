@@ -104,7 +104,7 @@ class Nyaa extends EventEmitter {
     const size = `${parseFloat(sizeMatch[1]).toFixed(1)} ${sizeMatch[2]}iB`
 
     // extract nyaa id
-    const idRegex = /https:\/\/nyaa\.si\/download\/(\d+)\.torrent/
+    const idRegex = /(\d+)/
     const idMatch = idRegex.exec(torrent.url)
     if (!idMatch) {
       this.log.warn("Nyaa ID from tokyo url could not be parsed:", torrent.url)
