@@ -101,6 +101,8 @@ class Nyaa extends EventEmitter {
       return
     }
 
+    const size = `${parseFloat(sizeMatch[1]).toFixed(1)} ${sizeMatch[2]}iB`
+
     // extract nyaa id
     const idRegex = /https:\/\/nyaa\.si\/download\/(\d+)\.torrent/
     const idMatch = idRegex.exec(torrent.url)
@@ -110,7 +112,13 @@ class Nyaa extends EventEmitter {
     }
 
     const id = parseInt(idMatch[1], 10)
-    const size = `${parseFloat(sizeMatch[1]).toFixed(1)} ${sizeMatch[2]}iB`
+
+    // Check if the release exists
+    const exists = getReleaseById(id)
+    if (exists) {
+      this.log.warn("Nyaa ID from tokyo url could not be parsed", torrent.url)
+      return
+    }
 
     this.emit("tokyorelease", {
       category,
