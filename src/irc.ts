@@ -3,7 +3,7 @@ import logger from "./log"
 
 const log = logger.getLogger("IRC")
 
-const bot = new irc.Client(process.env.IRC_SERVER, process.env.IRC_NAME, {
+const bot = new irc.Client(process.env.IRC_SERVER, process.env.IRC_NICK, {
   autoRejoin: true,
   floodProtection: true,
   floodProtectionDelay: 1000,
