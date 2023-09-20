@@ -34,7 +34,7 @@ bot.on("message", (from, to, text, message) => {
     }
 
     const priv = /^[@|~|&|%].*$/.exec(message.user)
-    if (!priv) {
+    if (!priv?.length) {
       log.warn("Enable command: not run by priviledged user:", message)
     }
 
