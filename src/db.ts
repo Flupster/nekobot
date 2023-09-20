@@ -33,8 +33,9 @@ export const getReleaseById = (id: number) => {
 }
 
 export const getChannelByName = (channel: string) => {
+  const name = channel.startsWith("#") ? channel.substring(1, channel.length) : channel
   const query = db.prepare("SELECT * FROM channels WHERE channel = $channel")
-  const chan = query.get({ $channel: channel }) as { channel: string; enabled: number }
+  const chan = query.get({ $channel: name }) as { channel: string; enabled: number }
   if (!chan) return null
 
   return {
