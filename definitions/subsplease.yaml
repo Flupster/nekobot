@@ -32,13 +32,17 @@ irc:
   parse:
     type: single
     lines:
-      - pattern: '\[Release\] (.*(SubsPlease).*?)\.?(mkv)? \((\d+.?\d*[KMGTP]?B)\) - .* - (.*)'
+      - test: 
+          - "[Release] [SubsPlease] Title - 01 (480p) [636F636B].mkv (420.69MB) - https://nyaa.si/view/0000000 - https://nyaa.si/view/0000000/torrent"
+      - pattern: '\[Release\] (.*(SubsPlease).*?)\.?(mkv)? \((\d+.?\d*[KMGTP]?B)\) - (.*) - (.*)'
         vars:
           - torrentName
           - releaseGroup
           - releaseTags
           - torrentSize
+          - infoUrl
           - torrentUrl
 
     match:
+      infourl: "{{ .infoUrl }}"
       torrenturl: "{{ .torrentUrl }}"

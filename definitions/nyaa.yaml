@@ -31,12 +31,17 @@ irc:
   parse:
     type: single
     lines:
-      - pattern: '\[([a-zA-Z)]+ - [a-zA-Z-]+)\] - (.*) - \((\d+.?\d* [KMGTP]?iB)\) - (https://nyaa\.si/view/\d+/torrent)'
+      - test:
+          - "[Anime - English-translated] - [Group] Woah an anime title is here (1080p) - (1.5 GiB) - https://nyaa.si/view/000000/torrent"
+          - "[Literature - Raw] - ハハ、私は日本語を知らないのに、なぜ私が日本語を話すと思うのですか - (78.9 MiB) - https://nyaa.si/view/000000/torrent"
+        pattern: '\[([a-zA-Z)]+ - [a-zA-Z-]+)\] - (.*) - \((\d+.?\d* [KMGTP]?iB)\) - ((https://nyaa\.si/view/\d+)/torrent)'
         vars:
           - category
           - torrentName
           - torrentSize
           - torrentUrl
+          - infoUrl
 
     match:
+      infourl: "{{ .infoUrl }}"
       torrenturl: "{{ .torrentUrl }}"
