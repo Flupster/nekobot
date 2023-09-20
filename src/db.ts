@@ -24,7 +24,7 @@ if (!table_channels) {
 export const insertRelease = (id: number, name: string) => {
   const insert = db.prepare("INSERT INTO releases (id,name) VALUES ($id,$name)")
   log.trace("Inserting release: ", id, name)
-  return insert.run({ $id: id, $name: name })
+  return insert.run({ $id: id, $name: "#" + name })
 }
 
 export const getReleaseById = (id: number) => {
@@ -44,16 +44,16 @@ export const getChannelByName = (channel: string) => {
 }
 
 export const setChannelEnabled = (channel: string, enabled: boolean) => {
-  if (channel.startsWith("#")) channel.substring(1, channel.length)
+  const name = channel.startsWith("#") ? channel.substring(1, channel.length) : channel
+  const chan = getChannelByName(name)
 
-  const chan = getChannelByName(channel)
   if (!chan) {
     log.info("Inserting channel:", { channel, enabled })
     const insert = db.prepare("INSERT INTO channels (channel,enabled) VALUES ($channel,$enabled)")
-    return insert.run({ $channel: channel, $enabled: enabled ? 1 : 0 })
+    return insert.run({ $channel: name, $enabled: enabled ? 1 : 0 })
   } else {
     const set = db.prepare("UPDATE channels SET enabled = $enabled WHERE channel = $channel")
-    return set.run({ $channel: channel, $enabled: enabled ? 1 : 0 })
+    return set.run({ $channel: name, $enabled: enabled ? 1 : 0 })
   }
 }
 
