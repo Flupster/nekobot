@@ -10,7 +10,7 @@ const bot = new irc.Client(process.env.IRC_SERVER, process.env.IRC_NICK, {
   autoRejoin: true,
   realName: process.env.IRC_NAME,
   userName: process.env.IRC_NICK,
-  channels: ["#tokyotosho-api", "#nyaannounce"],
+  channels: ["#tokyotosho-api", "#nyaannounce", "subsplease"],
 })
 
 // On netError exit with code 1
