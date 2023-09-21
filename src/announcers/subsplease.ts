@@ -1,12 +1,15 @@
 import Nyaa from "../nyaa"
 import bot from "../irc"
+import logger from "../log"
 import { getChannelByName } from "../db"
+
+const log = logger.getLogger("announce:subsplease")
 
 // Nyaa gives it XiB, convert to XB (MiB=>MB, GiB=>GB, etc)
 const convertSize = (size: string) => {
   const ssplit = size.split(" ")
   if (ssplit.length !== 2) {
-    console.warn(new Date(), "Failed to parse size")
+    log.warn("Failed to parse size", size, ssplit)
     return size.replace(" ", "").replace("i", "")
   }
 
@@ -15,12 +18,18 @@ const convertSize = (size: string) => {
 
 Nyaa.on("release", (release) => {
   const enabled = getChannelByName("subsplease")
-  if (!enabled || !enabled.enabled) return
+  if (!enabled || !enabled.enabled) {
+    log.trace("Channel Disabled, Skipping release", enabled, release.title)
+    return
+  }
 
-  if (!release.title.includes("[SubsPlease]")) return
+  if (!release.title.includes("[SubsPlease]")) {
+    log.trace("Release is not a SubsPlease release")
+    return
+  }
 
   if (!release.trusted) {
-    console.warn(new Date(), "Untrusted SubsPlease release", release)
+    log.warn("Untrusted SubsPlease release", release)
     return
   }
 
