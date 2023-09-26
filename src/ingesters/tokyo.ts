@@ -4,7 +4,7 @@ import logger from "../log"
 
 const log = logger.getLogger("ingester:tokyotosho")
 
-tokyotosho.on("release", async (release) => {
-  log.info("New Release", release.id)
-  await nyaa.getRelease(release.id)
+tokyotosho.on("release", async (id) => {
+  log.info("New Release", id)
+  await nyaa.getRelease(id)
 })
