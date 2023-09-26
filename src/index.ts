@@ -1,3 +1,3 @@
-import "./announcers/nyaannounce"
-import "./announcers/subsplease"
+import "./announcers"
+import "./ingesters"
 import "./irc"

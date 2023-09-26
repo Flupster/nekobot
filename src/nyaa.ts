@@ -1,42 +1,26 @@
-import { load } from "cheerio"
 import EventEmitter from "events"
-import { getReleaseById, insertRelease } from "./db"
-import TokyoTosho from "./tokyotosho"
 import logger from "./log"
+import { getFetchText } from "./utils/queue"
+import { parseRelease, parseReleases } from "./utils/parser"
+import Db from "./db"
 
 interface Nyaa {
-  categoryMap: Map<string, string>
+  lastId: number
   log: logger.Logger
   on(event: "release", listener: (release: NyaaRelease) => void): this
-  on(event: "tokyorelease", listener: (release: TokyoRelease) => void): this
+  on(event: "release-list", listener: (release: NyaaRelease) => void): this
 }
 
 class Nyaa extends EventEmitter {
   constructor() {
     super()
     this.log = logger.getLogger("Nyaa")
-    setInterval(this.update.bind(this), 30000)
-    TokyoTosho.on("release", (r, c) => this.convertTokyoTorrent(r, c))
+    this.lastId = 0
 
-    this.categoryMap = new Map<string, string>([
-      ["1_1", "Anime - Anime Music Video"],
-      ["1_2", "Anime - English-translated"],
-      ["1_3", "Anime - Non-English-translated"],
-      ["1_4", "Anime - Raw"],
-      ["2_1", "Audio - Lossless"],
-      ["2_2", "Audio - Lossy"],
-      ["3_1", "Literature - English-translated"],
-      ["3_2", "Literature - Non-English-translated"],
-      ["3_3", "Literature - Raw"],
-      ["4_1", "Live Action - English-translated"],
-      ["4_2", "Live Action - Idol/Promotional Video"],
-      ["4_3", "Live Action - Non-English-translated"],
-      ["4_4", "Live Action - Raw"],
-      ["5_1", "Pictures - Graphics"],
-      ["5_2", "Pictures - Photos"],
-      ["6_1", "Software - Applications"],
-      ["6_2", "Software - Games"],
-    ])
+    setInterval(this.update.bind(this), 30000)
+
+    this.on("release-list", (r) => this.getRelease(r.id))
+    this.update()
   }
 
   async update() {
@@ -48,86 +32,49 @@ class Nyaa extends EventEmitter {
     }
 
     for (const release of releases.reverse()) {
-      const exists = getReleaseById(release.id)
-      if (!exists) {
-        insertRelease(release.id, release.title)
-        this.emit("release", release)
-      }
+      this.emit("release-list", release)
     }
   }
 
   async getReleases(): Promise<NyaaRelease[]> {
-    const response = await fetch("https://nyaa.si/")
-    this.log.trace("GET https://nyaa.si/", response.status)
+    const text = await getFetchText(`https://nyaa.si`)
 
-    const text = await response.text()
-    const $ = load(text)
+    if (!text) {
+      this.log.error("Could not fetch:", `https://nyaa.si`)
+      return []
+    }
 
-    return $(".torrent-list tbody tr")
-      .toArray()
-      .map((el) => {
-        const release: Partial<NyaaRelease> = {}
-        const tds = $(el).find("td")
-
-        release.id = parseInt($(tds[1]).find("a").attr("href")?.split("/")[2] ?? "", 10)
-        release.title = $(tds[1]).find("a").last().attr("title")
-        release.guid = `https://nyaa.si/view/${release.id}`
-        release.link = `https://nyaa.si/download/${release.id}.torrent`
-        release.torrent = `https://nyaa.si/view/${release.id}/torrent`
-        release.categoryId = $(tds[0]).find("a").attr("href")?.substring(4) as CategoryIds
-        release.category = this.categoryMap.get(release.categoryId) as Categories
-        release.comments = parseInt($(tds[1]).find(".comments").text().trim(), 10) ?? 0
-        release.downloads = parseInt($(tds[7]).text(), 10) ?? 0
-        release.infoHash = ""
-        release.leechers = parseInt($(tds[6]).text(), 10) ?? 0
-        release.remake = el.attribs.class.includes("danger")
-        release.seeders = parseInt($(tds[5]).text(), 10) ?? 0
-        release.size = $(tds[3]).text()
-        release.trusted = el.attribs.class.includes("success")
-        release.pubDate = new Date($(tds[4]).text())
-
-        release.comments = isNaN(release.comments) ? 0 : release.comments
-
-        return release as NyaaRelease
-      })
+    return parseReleases(text)
   }
 
-  convertTokyoTorrent(torrent: TokyoTorrent, category: string) {
-    // convert size from XB to XiB
-    const sizeRegex = /(\d.+)?([KMGTP])/
-    const sizeMatch = sizeRegex.exec(torrent.size)
-    if (!sizeMatch) {
-      this.log.warn("TokyoTorrent size could not be parsed:", torrent.size)
-      return
+  async getRelease(id: number, force?: false): Promise<NyaaRelease | null> {
+    const exists = await Db.release.findFirst({ where: { id: { equals: id } } })
+    if (exists && !force) return exists as NyaaRelease
+
+    const text = await getFetchText(`https://nyaa.si/view/${id}`)
+
+    if (!text) {
+      this.log.error("Could not fetch:", `https://nyaa.si/view/${id}`)
+      return null
     }
 
-    const size = `${parseFloat(sizeMatch[1]).toFixed(1)} ${sizeMatch[2]}iB`
+    const release = parseRelease(id, text)
 
-    // extract nyaa id
-    const idRegex = /(\d+)/
-    const idMatch = idRegex.exec(torrent.url)
-    if (!idMatch) {
-      this.log.warn("Nyaa ID from tokyo url could not be parsed:", torrent.url)
-      return
+    if (!release) {
+      this.log.error("Failed to parse release", id)
+      return null
     }
 
-    const id = parseInt(idMatch[1], 10)
-
-    // Check if the release exists
-    const exists = getReleaseById(id)
-    if (exists) {
-      this.log.warn("Release was already announced:", id)
-      return
-    }
-
-    this.emit("tokyorelease", {
-      category,
-      title: torrent.name,
-      size,
-      torrent: `https://nyaa.si/view/${id}/torrent`,
+    const save = await Db.release.create({ data: release }).catch((ex) => {
+      this.log.error(ex)
+      return null
     })
 
-    insertRelease(id, torrent.name)
+    if (!save) return null
+
+    this.log.info("Release:", release.id)
+    this.emit("release", release)
+    return release
   }
 }
 

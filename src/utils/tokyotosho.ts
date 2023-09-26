@@ -1,6 +1,6 @@
 import EventEmitter from "events"
-import irc from "./irc"
-import logger from "./log"
+import irc from "../irc"
+import logger from "../log"
 
 interface TokyoToshi {
   categoryMap: Map<number, string>

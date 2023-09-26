@@ -1,0 +1,37 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Release {
+  id         Int       @id
+  title      String
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId String
+  comments   Int
+  downloads  Int
+  infoHash   String
+  leechers   Int
+  remake     Boolean
+  seeders    Int
+  size       String
+  trusted    Boolean
+  pubDate    DateTime
+  details    String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([id])
+}
+
+model Category {
+  id      String    @id
+  name    String    @unique
+  Release Release[]
+
+  @@index([id])
+}

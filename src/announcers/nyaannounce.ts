@@ -1,21 +1,18 @@
 import Nyaa from "../nyaa"
 import bot from "../irc"
 import logger from "../log"
-import { getChannelByName } from "../db"
+import Db from "../db"
 
-const log = logger.getLogger("announce:nyaannounce")
+const log = logger.getLogger("announcer:nyaannounce")
 
-const announce = (release: NyaaRelease | TokyoRelease) => {
-  const enabled = getChannelByName("nyaannounce")
-  if (!enabled || !enabled.enabled) {
-    log.trace("Channel Disabled, Skipping release", enabled, release.title)
-    return
-  }
-
+const announce = async (release: NyaaRelease) => {
   log.trace("Announcing release:", release.title)
-  const message = `[${release.category}] - ${release.title} - (${release.size}) - ${release.torrent}`
+  const category = await Db.category.findFirst({ where: { id: { equals: release.categoryId } } })
+
+  const url = `https://nyaa.si/view/${release.id}/torrent`
+  const message = `[${category?.name ?? "???"}] - ${release.title} - (${release.size}) - ${url}`
+
   bot.say("#nyaannounce", message)
 }
 
 Nyaa.on("release", announce)
-Nyaa.on("tokyorelease", announce)

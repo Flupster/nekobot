@@ -1,13 +1,21 @@
 {
   "dependencies": {
+    "@prisma/client": "5.3.1",
+    "bencode": "^4.0.0",
     "cheerio": "^1.0.0-rc.12",
     "ioredis": "^5.3.2",
     "log4js": "^6.9.1",
-    "matrix-org-irc": "^2.2.0"
+    "matrix-org-irc": "^2.2.0",
+    "p-queue": "^7.4.1",
+    "parse-torrent": "^11.0.14",
+    "querystring": "^0.2.1"
   },
   "devDependencies": {
+    "@types/bencode": "^2.0.2",
     "@types/node": "^20.6.2",
-    "bun-types": "^1.0.2"
+    "@types/parse-torrent": "^5.8.5",
+    "bun-types": "^1.0.2",
+    "prisma": "5.3.1"
   },
   "name": "nekobot",
   "module": "src/index.ts",
@@ -16,6 +24,7 @@
     "typescript": "^5.0.0"
   },
   "scripts": {
-    "start": "bun src/index.ts"
+    "start": "bun src/index.ts",
+    "seed": "bun prisma/seed.ts"
   }
 }
