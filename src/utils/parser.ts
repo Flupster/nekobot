@@ -16,6 +16,7 @@ export const parseRelease = (id: number, text: string) => {
   release.size = $(".panel-body .row:nth-child(4) div:nth-child(2)").text().trim()
   release.trusted = $("div.panel.panel-success").length > 0
   release.pubDate = new Date(($(".panel-body .row:nth-child(1) div:nth-child(4)").data("timestamp") as number) * 1000)
+  release.magnet = $('a[href*="magnet"]').attr('href')
   release.details = $(".panel-body:nth-child(1)").toString()
 
   return release as NyaaRelease

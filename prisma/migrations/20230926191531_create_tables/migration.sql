@@ -12,6 +12,7 @@ CREATE TABLE "Release" (
     "size" TEXT NOT NULL,
     "trusted" BOOLEAN NOT NULL,
     "pubDate" TIMESTAMP(3) NOT NULL,
+    "magnet" TEXT NOT NULL,
     "details" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -28,7 +29,10 @@ CREATE TABLE "Category" (
 );
 
 -- CreateIndex
-CREATE INDEX "Release_id_idx" ON "Release"("id");
+CREATE UNIQUE INDEX "Release_infoHash_key" ON "Release"("infoHash");
+
+-- CreateIndex
+CREATE INDEX "Release_id_infoHash_idx" ON "Release"("id", "infoHash");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Category_name_key" ON "Category"("name");

@@ -21,6 +21,7 @@ model Release {
   size       String
   trusted    Boolean
   pubDate    DateTime
+  magnet     String
   details    String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt

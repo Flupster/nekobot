@@ -11,6 +11,6 @@ type NyaaRelease = {
   size: string
   trusted: boolean
   pubDate: Date
+  magnet: string
   details: string
-  exists?: boolean
 }

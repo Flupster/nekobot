@@ -20,6 +20,7 @@ class Nyaa extends EventEmitter {
     setInterval(this.update.bind(this), 30000)
 
     this.on("release-list", (r) => this.getRelease(r.id))
+    this.update()
   }
 
   async update() {
