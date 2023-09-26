@@ -8,13 +8,13 @@ datasource db {
 }
 
 model Release {
-  id         Int       @id
+  id         Int      @id
   title      String
   category   Category @relation(fields: [categoryId], references: [id])
   categoryId String
   comments   Int
   downloads  Int
-  infoHash   String
+  infoHash   String   @unique
   leechers   Int
   remake     Boolean
   seeders    Int
@@ -22,10 +22,10 @@ model Release {
   trusted    Boolean
   pubDate    DateTime
   details    String
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  @@index([id])
+  @@index([id, infoHash])
 }
 
 model Category {
