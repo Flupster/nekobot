@@ -9,6 +9,7 @@ type NyaaRelease = {
   remake: boolean
   seeders: number
   size: string
+  size_bytes: bigint
   trusted: boolean
   pubDate: Date
   magnet: string

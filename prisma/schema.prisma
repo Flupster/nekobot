@@ -19,6 +19,7 @@ model Release {
   remake     Boolean
   seeders    Int
   size       String
+  size_bytes BigInt   @default(0)
   trusted    Boolean
   pubDate    DateTime
   magnet     String
