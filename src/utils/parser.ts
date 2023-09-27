@@ -23,6 +23,7 @@ export const parseRelease = (id: number, text: string) => {
   release.remake = $("div.panel.panel-danger").length > 0
   release.seeders = parseInt($(".panel-body .row:nth-child(2) div:nth-child(4) span").text().trim(), 10) ?? 0
   release.size = $(".panel-body .row:nth-child(4) div:nth-child(2)").text().trim()
+  release.size_bytes = BigInt(parseIecSize(release.size))
   release.trusted = $("div.panel.panel-success").length > 0
   release.pubDate = new Date(($(".panel-body .row:nth-child(1) div:nth-child(4)").data("timestamp") as number) * 1000)
   release.magnet = $('a[href*="magnet"]').attr("href")
@@ -50,7 +51,7 @@ export const parseReleases = (text: string) => {
       release.remake = el.attribs.class.includes("danger")
       release.seeders = parseInt($(tds[5]).text(), 10) ?? 0
       release.size = $(tds[3]).text()
-      release.size_bytes = parseIecSize(release.size)
+      release.size_bytes = BigInt(parseIecSize(release.size))
       release.trusted = el.attribs.class.includes("success")
       release.pubDate = new Date($(tds[4]).text())
       release.comments = isNaN(release.comments) ? 0 : release.comments
